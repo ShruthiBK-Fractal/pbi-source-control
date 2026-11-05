@@ -254,6 +254,583 @@ table Measure
 		lineageTag: 5514527e-a4ad-4d38-83ad-844669f963a5
 		dataCategory: ImageUrl
 
+	measure 'Sales KPI HTML' =
+			
+			VAR _CY =[FCT_APE]
+			
+			VAR _PY =
+			    CALCULATE(
+			        [FCT_APE],
+			        DATEADD(dim_date[date], -1, YEAR)
+			    )
+			
+			VAR _VariancePct =
+			    DIVIDE(_CY - _PY, _PY)
+			
+			/*====================================================
+			    KPI FORMATTING
+			====================================================*/
+			
+			VAR _CYText =
+			    SWITCH(
+			        TRUE(),
+			        ABS(_CY) >= 1000000000,
+			            FORMAT(_CY / 1000000000, "0.0") & "B",
+			        ABS(_CY) >= 1000000,
+			            FORMAT(_CY / 1000000, "0.0") & "M",
+			        ABS(_CY) >= 1000,
+			            FORMAT(_CY / 1000, "0.0") & "K",
+			        FORMAT(_CY, "#,##0")
+			    )
+			
+			VAR _PYText =
+			    SWITCH(
+			        TRUE(),
+			        ABS(_PY) >= 1000000000,
+			            FORMAT(_PY / 1000000000, "0.0") & "B",
+			        ABS(_PY) >= 1000000,
+			            FORMAT(_PY / 1000000, "0.0") & "M",
+			        ABS(_PY) >= 1000,
+			            FORMAT(_PY / 1000, "0.0") & "K",
+			        FORMAT(_PY, "#,##0")
+			    )
+			
+			VAR _VarianceColor =
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(_VariancePct), "#64748B",
+			        _VariancePct > 0, "#16A34A",
+			        _VariancePct < 0, "#DC2626",
+			        "#64748B"
+			    )
+			
+			VAR _VarianceArrow =
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(_VariancePct), "",
+			        _VariancePct > 0, "▲ ",
+			        _VariancePct < 0, "▼ ",
+			        ""
+			    )
+			
+			VAR _VarianceText =
+			    IF(
+			        ISBLANK(_VariancePct),
+			        "N/A",
+			        _VarianceArrow &
+			        FORMAT(ABS(_VariancePct), "0.0%")
+			    )
+			
+			
+			/*====================================================
+			    MONTH TABLE
+			====================================================*/
+			
+			VAR _Months =
+			    ADDCOLUMNS(
+			        GENERATESERIES(1,12,1),
+			
+			        "@MonthName",
+			            FORMAT(
+			                DATE(2000,[Value],1),
+			                "MMM"
+			            ),
+			
+			        "@CY",
+			            VAR _M = [Value]
+			            RETURN
+			                CALCULATE(
+			                    [FCT_APE],
+			                    FILTER(
+			                        'dim_date',
+			                        MONTH(dim_date[date]) = _M
+			                    )
+			                ),
+			
+			        "@PY",
+			            VAR _M = [Value]
+			            RETURN
+			                CALCULATE(
+			                    [FCT_APE],
+			                    DATEADD(
+			                        dim_date[date],
+			                        -1,
+			                        YEAR
+			                    ),
+			                    FILTER(
+			                        'dim_date',
+			                        MONTH(dim_date[date]) = _M
+			                    )
+			                )
+			    )
+			
+			
+			/*====================================================
+			    MAX VALUE
+			====================================================*/
+			
+			VAR _MaxValue =
+			    MAX(
+			        MAXX(_Months, [@CY]),
+			        MAXX(_Months, [@PY])
+			    )
+			
+			
+			/*====================================================
+			    CHART SETTINGS
+			====================================================*/
+			
+			VAR _ChartWidth = 720
+			VAR _ChartHeight = 205
+			
+			VAR _Top = 20
+			VAR _Bottom = 160
+			VAR _PlotHeight = _Bottom - _Top
+			
+			VAR _MonthWidth =
+			    DIVIDE(
+			        _ChartWidth,
+			        12
+			    )
+			
+			VAR _BarWidth = 18
+			VAR _Gap = 3
+			
+			
+			/*====================================================
+			    GRID
+			====================================================*/
+			
+			VAR _Grid =
+			
+			    "<line
+			        x1='0'
+			        y1='55'
+			        x2='720'
+			        y2='55'
+			        stroke='#F1F5F9'
+			        stroke-width='1'
+			    />
+			
+			    <line
+			        x1='0'
+			        y1='105'
+			        x2='720'
+			        y2='105'
+			        stroke='#F1F5F9'
+			        stroke-width='1'
+			    />
+			
+			    <line
+			        x1='0'
+			        y1='160'
+			        x2='720'
+			        y2='160'
+			        stroke='#E2E8F0'
+			        stroke-width='1'
+			    />"
+			
+			
+			/*====================================================
+			    BUILD MONTHLY BARS
+			====================================================*/
+			
+			VAR _Bars =
+			
+			    CONCATENATEX(
+			
+			        _Months,
+			
+			        VAR _MonthNumber = [Value]
+			
+			        VAR _MonthName =
+			            [@MonthName]
+			
+			        VAR _CYValue =
+			            COALESCE(
+			                [@CY],
+			                0
+			            )
+			
+			        VAR _PYValue =
+			            COALESCE(
+			                [@PY],
+			                0
+			            )
+			
+			
+			        /*-------------------------
+			            X POSITION
+			        -------------------------*/
+			
+			        VAR _CenterX =
+			            ((_MonthNumber - 1) * _MonthWidth)
+			            + (_MonthWidth / 2)
+			
+			
+			        /*-------------------------
+			            HEIGHT
+			        -------------------------*/
+			
+			        VAR _CYHeight =
+			            DIVIDE(
+			                _CYValue,
+			                _MaxValue,
+			                0
+			            )
+			            * _PlotHeight
+			
+			
+			        VAR _PYHeight =
+			            DIVIDE(
+			                _PYValue,
+			                _MaxValue,
+			                0
+			            )
+			            * _PlotHeight
+			
+			
+			        /*-------------------------
+			            Y POSITION
+			        -------------------------*/
+			
+			        VAR _CYY =
+			            _Bottom - _CYHeight
+			
+			        VAR _PYY =
+			            _Bottom - _PYHeight
+			
+			
+			        /*-------------------------
+			            X BAR POSITION
+			        -------------------------*/
+			
+			        VAR _CYX =
+			            _CenterX
+			            - _BarWidth
+			            - (_Gap / 2)
+			
+			        VAR _PYX =
+			            _CenterX
+			            + (_Gap / 2)
+			
+			
+			        RETURN
+			
+			        /* CY BAR */
+			
+			        "<rect
+			            x='" & FORMAT(_CYX,"0.0") & "'
+			            y='" & FORMAT(_CYY,"0.0") & "'
+			            width='" & _BarWidth & "'
+			            height='" & FORMAT(_CYHeight,"0.0") & "'
+			            rx='3'
+			            fill='#2563EB'
+			        >
+			
+			            <title>"
+			                & _MonthName
+			                & " CY: "
+			                & FORMAT(_CYValue,"#,##0")
+			            & "</title>
+			
+			        </rect>"
+			
+			
+			        /* PY BAR */
+			
+			        &
+			
+			        "<rect
+			            x='" & FORMAT(_PYX,"0.0") & "'
+			            y='" & FORMAT(_PYY,"0.0") & "'
+			            width='" & _BarWidth & "'
+			            height='" & FORMAT(_PYHeight,"0.0") & "'
+			            rx='3'
+			            fill='#CBD5E1'
+			        >
+			
+			            <title>"
+			                & _MonthName
+			                & " PY: "
+			                & FORMAT(_PYValue,"#,##0")
+			            & "</title>
+			
+			        </rect>"
+			
+			
+			        /* MONTH */
+			
+			        &
+			
+			        "<text
+			            x='" & FORMAT(_CenterX,"0.0") & "'
+			            y='182'
+			            text-anchor='middle'
+			            font-family='Segoe UI'
+			            font-size='11'
+			            fill='#64748B'
+			        >"
+			            & _MonthName &
+			        "</text>",
+			
+			        "",
+			
+			        [Value],
+			        ASC
+			    )
+			
+			
+			/*====================================================
+			    FINAL HTML
+			====================================================*/
+			
+			RETURN
+			
+			"<div style='
+			    box-sizing:border-box;
+			    width:100%;
+			    background:#FFFFFF;
+			    border:1px solid #E2E8F0;
+			    border-radius:12px;
+			    padding:20px;
+			    font-family:Segoe UI, Arial, sans-serif;
+			'>
+			
+			    <!-- =================================================
+			         TITLE
+			    ================================================== -->
+			
+			    <div style='
+			        font-size:15px;
+			        font-weight:600;
+			        color:#0F172A;
+			        margin-bottom:20px;
+			    '>
+			        Sales Performance
+			    </div>
+			
+			
+			    <!-- =================================================
+			         MAIN CONTAINER
+			    ================================================== -->
+			
+			    <div style='
+			        display:flex;
+			        width:100%;
+			        align-items:stretch;
+			    '>
+			
+			
+			        <!-- =================================================
+			             LEFT KPI SECTION
+			        ================================================== -->
+			
+			        <div style='
+			            width:175px;
+			            min-width:175px;
+			            padding-right:22px;
+			        '>
+			
+			
+			            <!-- CY -->
+			
+			            <div>
+			
+			                <div style='
+			                    color:#64748B;
+			                    font-size:11px;
+			                    font-weight:500;
+			                    margin-bottom:4px;
+			                '>
+			                    CY SALES
+			                </div>
+			
+			                <div style='
+			                    color:#0F172A;
+			                    font-size:27px;
+			                    font-weight:700;
+			                '>"
+			                    & _CYText &
+			                "</div>
+			
+			            </div>
+			
+			
+			            <!-- KPI SEPARATOR -->
+			
+			            <div style='
+			                border-top:1px solid #E2E8F0;
+			                margin-top:14px;
+			                margin-bottom:14px;
+			            '>
+			            </div>
+			
+			
+			            <!-- PY -->
+			
+			            <div>
+			
+			                <div style='
+			                    color:#64748B;
+			                    font-size:11px;
+			                    font-weight:500;
+			                    margin-bottom:4px;
+			                '>
+			                    PREVIOUS YEAR
+			                </div>
+			
+			                <div style='
+			                    color:#475569;
+			                    font-size:23px;
+			                    font-weight:600;
+			                '>"
+			                    & _PYText &
+			                "</div>
+			
+			            </div>
+			
+			
+			            <!-- KPI SEPARATOR -->
+			
+			            <div style='
+			                border-top:1px solid #E2E8F0;
+			                margin-top:14px;
+			                margin-bottom:14px;
+			            '>
+			            </div>
+			
+			
+			            <!-- VARIANCE -->
+			
+			            <div>
+			
+			                <div style='
+			                    color:#64748B;
+			                    font-size:11px;
+			                    font-weight:500;
+			                    margin-bottom:4px;
+			                '>
+			                    YoY VARIANCE
+			                </div>
+			
+			                <div style='
+			                    color:" & _VarianceColor & ";
+			                    font-size:21px;
+			                    font-weight:700;
+			                '>"
+			                    & _VarianceText &
+			                "</div>
+			
+			                <div style='
+			                    color:#94A3B8;
+			                    font-size:10px;
+			                    margin-top:3px;
+			                '>
+			                    vs Previous Year
+			                </div>
+			
+			            </div>
+			
+			
+			        </div>
+			
+			
+			        <!-- =================================================
+			             VERTICAL SEPARATOR
+			        ================================================== -->
+			
+			        <div style='
+			            border-left:1px solid #E2E8F0;
+			            margin-left:4px;
+			            margin-right:24px;
+			        '>
+			        </div>
+			
+			
+			        <!-- =================================================
+			             RIGHT BAR CHART
+			        ================================================== -->
+			
+			        <div style='
+			            flex:1;
+			            min-width:0;
+			        '>
+			
+			
+			            <!-- CHART HEADER -->
+			
+			            <div style='
+			                display:flex;
+			                justify-content:space-between;
+			                align-items:center;
+			                margin-bottom:5px;
+			            '>
+			
+			                <div style='
+			                    color:#334155;
+			                    font-size:12px;
+			                    font-weight:600;
+			                '>
+			                    Monthly Sales Trend
+			                </div>
+			
+			
+			                <!-- LEGEND -->
+			
+			                <div style='
+			                    font-size:10px;
+			                    color:#64748B;
+			                '>
+			
+			                    <span style='
+			                        color:#2563EB;
+			                        font-size:14px;
+			                    '>
+			                        ●
+			                    </span>
+			
+			                    CY
+			
+			                    &nbsp;&nbsp;&nbsp;
+			
+			                    <span style='
+			                        color:#CBD5E1;
+			                        font-size:14px;
+			                    '>
+			                        ●
+			                    </span>
+			
+			                    Previous Year
+			
+			                </div>
+			
+			            </div>
+			
+			
+			            <!-- CHART -->
+			
+			            <svg
+			                width='100%'
+			                height='205'
+			                viewBox='0 0 720 205'
+			                preserveAspectRatio='none'
+			            >"
+			
+			                & _Grid
+			                & _Bars &
+			
+			            "</svg>
+			
+			
+			        </div>
+			
+			
+			    </div>
+			
+			</div>"
+		lineageTag: 2dd52436-b458-4577-b23b-c0e37e892788
+
 	column Column
 		formatString: 0
 		lineageTag: 713a959d-0452-4ba7-a326-659e87211160

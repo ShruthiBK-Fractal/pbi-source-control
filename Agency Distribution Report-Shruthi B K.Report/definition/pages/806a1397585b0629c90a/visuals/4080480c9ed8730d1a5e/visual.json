@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "4080480c9ed8730d1a5e",
   "position": {
     "x": 51.063829787234042,
@@ -176,37 +176,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "62a2fa90cd739f3dd0dc",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Measure"
-              }
-            },
-            "Property": "APE_YTD"
-          }
-        },
-        "type": "Advanced"
-      },
-      {
-        "name": "e6c0e064fb9dc86f0ec4",
-        "field": {
-          "Measure": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "Measure"
-              }
-            },
-            "Property": "APE vs Target%"
-          }
-        },
-        "type": "Advanced"
-      }
-    ]
   }
 }

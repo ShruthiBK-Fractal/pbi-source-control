@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "2b2ce4b0160094864b06",
   "position": {
     "x": 1515.5744680851064,
     "y": 130.72340425531917,
-    "z": 6000,
+    "z": 5000,
     "height": 128.83948912668279,
     "width": 300,
-    "tabOrder": 6000
+    "tabOrder": 5000
   },
   "visual": {
     "visualType": "slicer",
@@ -409,23 +409,5 @@
       ]
     },
     "drillFilterOtherVisuals": true
-  },
-  "filterConfig": {
-    "filters": [
-      {
-        "name": "8b3bb51e9e3a0692a24c",
-        "field": {
-          "Column": {
-            "Expression": {
-              "SourceRef": {
-                "Entity": "dim_agent"
-              }
-            },
-            "Property": "agent_name"
-          }
-        },
-        "type": "Categorical"
-      }
-    ]
   }
 }

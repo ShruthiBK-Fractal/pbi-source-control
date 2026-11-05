@@ -23,11 +23,6 @@ relationship AutoDetected_f8b7998f-42e9-46f4-9084-7f1142b0de95
 	fromColumn: fact_sales.product_id
 	toColumn: dim_product.product_id
 
-relationship 12c244ab-f15f-4a05-b81e-430538bb744d
-	joinOnDateBehavior: datePartOnly
-	fromColumn: dim_date.date
-	toColumn: LocalDateTable_c3cb0cff-fb43-430a-a4bd-886fe7a8c52e.Date
-
 relationship AutoDetected_bde1e514-308c-473a-9638-39761f932677
 	fromColumn: fact_sales.date_key
 	toColumn: dim_date.date_key

@@ -1,0 +1,303 @@
+createOrReplace
+
+	ref table Measure
+
+		measure 'CY PY Sales HTML' =
+				
+				VAR _CY =
+				    [APE_YTD]
+				
+				VAR _PY =
+				    CALCULATE([FCT_APE],SAMEPERIODLASTYEAR(dim_date[date]))
+				
+				VAR _Variance =
+				    _CY - _PY
+				
+				VAR _VariancePct =
+				    DIVIDE(_Variance, _PY)
+				
+				VAR _VarianceColor =
+				    IF(_VariancePct >= 0, "#16A34A", "#DC2626")
+				
+				VAR _Arrow =
+				    IF(_VariancePct >= 0, "▲", "▼")
+				
+				/* -----------------------------------------
+				   DAILY TREND DATA
+				----------------------------------------- */
+				
+				VAR _TrendData =
+				    ADDCOLUMNS(
+				        VALUES(dim_date[date]),
+				        "@CY", _CY,
+				        "@PY", _PY
+				    )
+				
+				VAR _MinDate =
+				    MINX(_TrendData, dim_date[date])
+				
+				VAR _MaxDate =
+				    MAXX(_TrendData, dim_date[date])
+				
+				VAR _MaxValue =
+				    MAX(
+				        MAXX(_TrendData, [@CY]),
+				        MAXX(_TrendData, [@PY])
+				    )
+				
+				/* -----------------------------------------
+				   CHART SIZE
+				----------------------------------------- */
+				
+				VAR _ChartWidth = 700
+				VAR _ChartHeight = 130
+				
+				/* -----------------------------------------
+				   CY SVG POINTS
+				----------------------------------------- */
+				
+				VAR _CYPoints =
+				    CONCATENATEX(
+				        _TrendData,
+				        VAR _Date = dim_date[date]
+				        VAR _Value = [@CY]
+				
+				        VAR _X =
+				            DIVIDE(
+				                _Date - _MinDate,
+				                _MaxDate - _MinDate,
+				                0
+				            ) * _ChartWidth
+				
+				        VAR _Y =
+				            _ChartHeight -
+				            DIVIDE(
+				                _Value,
+				                _MaxValue,
+				                0
+				            ) * (_ChartHeight - 10)
+				
+				        RETURN
+				            FORMAT(_X, "0") & "," &
+				            FORMAT(_Y, "0"),
+				        " ",
+				        dim_date[date],
+				        ASC
+				    )
+				
+				/* -----------------------------------------
+				   PY SVG POINTS
+				----------------------------------------- */
+				
+				VAR _PYPoints =
+				    CONCATENATEX(
+				        _TrendData,
+				        VAR _Date =dim_date[date]
+				        VAR _Value = [@PY]
+				
+				        VAR _X =
+				            DIVIDE(
+				                _Date - _MinDate,
+				                _MaxDate - _MinDate,
+				                0
+				            ) * _ChartWidth
+				
+				        VAR _Y =
+				            _ChartHeight -
+				            DIVIDE(
+				                _Value,
+				                _MaxValue,
+				                0
+				            ) * (_ChartHeight - 10)
+				
+				        RETURN
+				            FORMAT(_X, "0") & "," &
+				            FORMAT(_Y, "0"),
+				        " ",
+				       dim_date[date],
+				        ASC
+				    )
+				
+				RETURN
+				
+				"<div style='
+				    font-family:Segoe UI;
+				    background:#FFFFFF;
+				    border:1px solid #E5E7EB;
+				    border-radius:12px;
+				    padding:20px;
+				'>
+				
+				    <!-- HEADER -->
+				
+				    <div style='
+				        font-size:14px;
+				        color:#6B7280;
+				        margin-bottom:14px;
+				    '>
+				        Sales Performance
+				    </div>
+				
+				
+				    <!-- KPI SECTION -->
+				
+				    <div style='display:flex; gap:45px;'>
+				
+				        <div>
+				            <div style='
+				                font-size:12px;
+				                color:#6B7280;
+				            '>
+				                CY Sales
+				            </div>
+				
+				            <div style='
+				                font-size:28px;
+				                font-weight:600;
+				                color:#111827;
+				            '>
+				                " & FORMAT(_CY, "#,##0,,.0M") & "
+				            </div>
+				        </div>
+				
+				
+				        <div>
+				            <div style='
+				                font-size:12px;
+				                color:#6B7280;
+				            '>
+				                Previous Year
+				            </div>
+				
+				            <div style='
+				                font-size:28px;
+				                font-weight:600;
+				                color:#6B7280;
+				            '>
+				                " & FORMAT(_PY, "#,##0,,.0M") & "
+				            </div>
+				        </div>
+				
+				
+				        <div>
+				            <div style='
+				                font-size:12px;
+				                color:#6B7280;
+				            '>
+				                YoY Change
+				            </div>
+				
+				            <div style='
+				                font-size:18px;
+				                font-weight:600;
+				                color:" & _VarianceColor & ";
+				                margin-top:7px;
+				            '>
+				                " & _Arrow & "
+				                " & FORMAT(ABS(_VariancePct), "0.0%") & "
+				            </div>
+				        </div>
+				
+				    </div>
+				
+				
+				    <!-- SEPARATOR -->
+				
+				    <div style='
+				        border-top:1px solid #F3F4F6;
+				        margin-top:18px;
+				        margin-bottom:15px;
+				    '>
+				    </div>
+				
+				
+				    <!-- LEGEND -->
+				
+				    <div style='
+				        font-size:11px;
+				        color:#6B7280;
+				        margin-bottom:5px;
+				    '>
+				        <span style='color:#2563EB;'>●</span>
+				        CY
+				
+				        &nbsp;&nbsp;&nbsp;
+				
+				        <span style='color:#9CA3AF;'>●</span>
+				        Previous Year
+				    </div>
+				
+				
+				    <!-- DAILY TREND -->
+				
+				    <svg
+				        width='100%'
+				        height='150'
+				        viewBox='0 0 700 150'
+				        preserveAspectRatio='none'
+				    >
+				
+				        <!-- GRID -->
+				
+				        <line
+				            x1='0'
+				            y1='130'
+				            x2='700'
+				            y2='130'
+				            stroke='#E5E7EB'
+				            stroke-width='1'
+				        />
+				
+				
+				        <!-- PY LINE -->
+				
+				        <polyline
+				            points='" & _PYPoints & "'
+				            fill='none'
+				            stroke='#9CA3AF'
+				            stroke-width='2'
+				            stroke-dasharray='5 4'
+				        />
+				
+				
+				        <!-- CY LINE -->
+				
+				        <polyline
+				            points='" & _CYPoints & "'
+				            fill='none'
+				            stroke='#2563EB'
+				            stroke-width='3'
+				            stroke-linecap='round'
+				            stroke-linejoin='round'
+				        />
+				
+				    </svg>
+				
+				
+				    <!-- DATE RANGE -->
+				
+				    <div style='
+				        display:flex;
+				        justify-content:space-between;
+				        font-size:10px;
+				        color:#9CA3AF;
+				        margin-top:-5px;
+				    '>
+				
+				        <span>
+				            " & FORMAT(_MinDate, "dd MMM") & "
+				        </span>
+				
+				        <span>
+				            Daily Sales Trend
+				        </span>
+				
+				        <span>
+				            " & FORMAT(_MaxDate, "dd MMM") & "
+				        </span>
+				
+				    </div>
+				
+				</div>"
+			lineageTag: 2dd52436-b458-4577-b23b-c0e37e892788
+

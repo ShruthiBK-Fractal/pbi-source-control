@@ -1,5 +1,6 @@
 table dim_date
 	lineageTag: 72a32735-bafc-40d2-b349-80d280e9004c
+	dataCategory: Time
 
 	column date_key
 		dataType: int64
@@ -12,15 +13,11 @@ table dim_date
 
 	column date
 		dataType: dateTime
+		isKey
 		formatString: Long Date
 		lineageTag: 37c1660b-4325-4ebc-9d7e-3a3b07ffdabc
 		summarizeBy: none
 		sourceColumn: date
-
-		variation Variation
-			isDefault
-			relationship: 12c244ab-f15f-4a05-b81e-430538bb744d
-			defaultHierarchy: LocalDateTable_c3cb0cff-fb43-430a-a4bd-886fe7a8c52e.'Date Hierarchy'
 
 		annotation SummarizationSetBy = Automatic
 
