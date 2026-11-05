@@ -1,0 +1,29 @@
+table Dim_Rls
+	lineageTag: 0fee1b40-5768-4d80-bbbf-02d27f24c7ef
+
+	column EmailID
+		dataType: string
+		lineageTag: 197e6131-abb7-4ee5-99da-66a71b411393
+		summarizeBy: none
+		sourceColumn: EmailID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: d60f2cc5-df2e-4340-832a-abf04feee87c
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Rls = m
+		mode: import
+		source =
+				let
+				  Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WKs4oKi3JyNTLdkgrSkwuSczRS8xU0lFyTSwuUYqNBQA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [EmailID = _t, Region = _t])
+				in
+				  Source
+
+	annotation PBI_ResultType = Table
+

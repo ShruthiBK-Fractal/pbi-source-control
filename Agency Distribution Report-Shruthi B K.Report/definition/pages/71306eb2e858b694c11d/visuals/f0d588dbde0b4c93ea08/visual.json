@@ -1,0 +1,298 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "f0d588dbde0b4c93ea08",
+  "position": {
+    "x": 0,
+    "y": 202.77777777777777,
+    "z": 0,
+    "height": 855.55555555555554,
+    "width": 1919.4444444444446,
+    "tabOrder": 0
+  },
+  "visual": {
+    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "query": {
+      "queryState": {
+        "dataset": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_agent"
+                    }
+                  },
+                  "Property": "agent_id"
+                }
+              },
+              "queryRef": "dim_agent.agent_id",
+              "nativeQueryRef": "agent_id",
+              "format": "0"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_agent"
+                    }
+                  },
+                  "Property": "agent_name"
+                }
+              },
+              "queryRef": "dim_agent.agent_name",
+              "nativeQueryRef": "agent_name"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Measure"
+                    }
+                  },
+                  "Property": "APE_YTD"
+                }
+              },
+              "queryRef": "Measure.APE_YTD",
+              "nativeQueryRef": "APE_YTD"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Measure"
+                    }
+                  },
+                  "Property": "Target_YTD"
+                }
+              },
+              "queryRef": "Measure.Target_YTD",
+              "nativeQueryRef": "Target_YTD"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "dim_agent"
+                  }
+                },
+                "Property": "agent_id"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "vega": [
+        {
+          "properties": {
+            "jsonSpec": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\r\n  \"data\": { \"name\": \"dataset\" },\r\n  \"transform\": [\r\n    { \"filter\": \"datum.agent_name != null\" },\r\n    {\r\n      \"calculate\": \"datum[''APE_YTD''] / datum[''Target_YTD'']\",\r\n      \"as\": \"attainment\"\r\n    },\r\n    {\r\n      \"calculate\": \"datum.attainment >= 1.1 ? ''Above target'' : datum.attainment >= 0.9 ? ''On track'' : ''Below target''\",\r\n      \"as\": \"status\"\r\n    }\r\n  ],\r\n  \"layer\": [\r\n    {\r\n      \"mark\": \"bar\",\r\n      \"encoding\": {\r\n        \"y\": { \"field\": \"agent_name\", \"type\": \"nominal\", \"title\": \"Agent\" },\r\n        \"x\": { \"field\": \"APE_YTD\", \"type\": \"quantitative\", \"title\": \"APE (USD)\" },\r\n        \"color\": {\r\n          \"field\": \"status\",\r\n          \"type\": \"nominal\",\r\n          \"scale\": {\r\n            \"domain\": [\"Above target\", \"On track\", \"Below target\"],\r\n            \"range\": [\"#1D9E75\", \"#378ADD\", \"#E24B4A\"]\r\n          }\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"mark\": { \"type\": \"tick\", \"color\": \"black\", \"thickness\": 10, \"size\": 50 },\r\n      \"encoding\": {\r\n        \"y\": { \"field\": \"agent_name\", \"type\": \"nominal\" },\r\n        \"x\": { \"field\": \"Target_YTD\", \"type\": \"quantitative\" },\r\n                \"tooltip\": [\r\n          { \"field\": \"agent_name\", \"type\": \"nominal\", \"title\": \"Agent\" },\r\n          { \"field\": \"ape_actual\", \"type\": \"quantitative\", \"title\": \"APE\" },\r\n          { \"field\": \"ape_target\", \"type\": \"quantitative\", \"title\": \"Target\" },\r\n          { \"field\": \"ratio\", \"type\": \"quantitative\", \"title\": \"APE / Target\" }\r\n        ]\r\n\r\n      }\r\n    }\r\n  ]\r\n}'"
+                }
+              }
+            },
+            "version": {
+              "expr": {
+                "Literal": {
+                  "Value": "'6.4.3'"
+                }
+              }
+            },
+            "enableSelection": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "provider": {
+              "expr": {
+                "Literal": {
+                  "Value": "'vegaLite'"
+                }
+              }
+            },
+            "renderMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'canvas'"
+                }
+              }
+            },
+            "enableHighlight": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "stateManagement": [
+        {
+          "properties": {
+            "supportFieldConfiguration": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"agent_name\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":false,\"formatted\":false,\"names\":false},\"agent_id\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":false,\"formatted\":false,\"names\":false},\"Sum of ape_usd\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":true,\"formatted\":true,\"names\":false},\"Sum of ape_target_usd\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":true,\"formatted\":true,\"names\":false}}'"
+                }
+              }
+            },
+            "denebMetaVersion": {
+              "expr": {
+                "Literal": {
+                  "Value": "'2'"
+                }
+              }
+            },
+            "consolidateFieldParameters": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "viewportHeight": {
+              "expr": {
+                "Literal": {
+                  "Value": "775D"
+                }
+              }
+            },
+            "viewportWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "1885D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "developer": [
+        {
+          "properties": {
+            "version": {
+              "expr": {
+                "Literal": {
+                  "Value": "'2.0.1.0'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "editor": [
+        {
+          "properties": {
+            "debugTableRowsPerPage": {
+              "expr": {
+                "Literal": {
+                  "Value": "25D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "display": [
+        {
+          "properties": {
+            "scrollbarRadius": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dataLimit": [
+        {
+          "properties": {
+            "override": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableIncrementalDataUpdates": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "showCustomVisualNotes": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Agent Performance Grid'"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "24D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

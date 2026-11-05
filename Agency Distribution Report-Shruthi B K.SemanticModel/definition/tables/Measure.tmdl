@@ -1,0 +1,273 @@
+table Measure
+	lineageTag: 77a721fc-2eb9-4593-9d33-7cf653b229b4
+
+	measure APE_YTD = ```
+			
+			VAR LastSaleDate=CALCULATE(MAX(fact_sales[date_key]),ALL(fact_sales))
+			VAR LastActualDate=Calculate(max(dim_date[Date]),all(dim_date),dim_date[date_key]=LastSaleDate)
+			Return 
+			CALCULATE(TOTALYTD(sum(fact_sales[ape_usd]),dim_date[Date]),dim_date[Date]<=LastActualDate)
+			
+			```
+		lineageTag: 45357713-7fa7-4f92-9457-13b5b5757042
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Target_YTD = ```
+			
+			VAR LastSaleDate=CALCULATE(MAX(fact_sales[date_key]),ALL(fact_sales))
+			VAR LastActualDate=Calculate(max(dim_date[Date]),all(dim_date),dim_date[date_key]=LastSaleDate)
+			Return 
+			CALCULATE(TOTALYTD(sum(fact_target[ape_target_usd]),dim_date[Date]),dim_date[Date]<=LastActualDate)
+			
+			```
+		lineageTag: b6361090-ff93-416b-a599-e41c33779b1a
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'APE vs Target%' = DIVIDE([APE_YTD],[Target_YTD],0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: ba125885-f3bc-4206-ba7f-1dd586b1347a
+
+	measure Active_Agents = CALCULATE(DISTINCTCOUNT(dim_agent[agent_id]),dim_agent[active_flag]=1)
+		formatString: 0
+		lineageTag: 4759bf81-6132-4584-8eac-4106c102d694
+
+	measure Persistency_Rate =
+			
+			VAR __Renewed =
+			    CALCULATE (
+			        COUNTROWS ( fact_persistency ),
+			        fact_persistency[renewal_status] = "renewed",USERELATIONSHIP(dim_date[date_key],fact_persistency[renewal_due_date_key])
+			    )
+			VAR __Due =
+			    CALCULATE (
+			        COUNTROWS ( fact_persistency ),
+			        fact_persistency[renewal_status] IN { "renewed", "lapsed", "grace" },USERELATIONSHIP(dim_date[date_key],fact_persistency[renewal_due_date_key])
+			    )
+			RETURN
+			DIVIDE ( __Renewed, __Due )
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 2ee5b15f-9e19-4211-aa6b-5c7a534ea90f
+
+	measure 'APE vs Target(Full)%' = DIVIDE ( SUM ( fact_sales[ape_usd] ), SUM ( fact_target[ape_target_usd] ), 0 )
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 68e5c6e6-24bb-431c-a853-db61886a44b1
+
+	measure Agent_Profile_card_HTML =
+			
+			VAR SelectedAgent = SELECTEDVALUE ( dim_agent[agent_name] )
+			RETURN
+			IF (
+			    ISBLANK ( SelectedAgent ),
+			    "<div style='font-family:Arial; padding:20px; text-align:center; color:#888;'>Select an agent on Page 2 to view their profile.</div>",
+			    VAR AgentName = SelectedAgent
+			    VAR Territory = SELECTEDVALUE ( dim_agent[territory], "—" )
+			    VAR YTD1 = FORMAT ( [APE_YTD], "$#,##0" )
+			    VAR Rank1 = FORMAT ( [Rank by APE], "0" )
+			    VAR MoM = [APE MoM Growth %]
+			    VAR MoMText = FORMAT ( MoM, "+0.0%;-0.0%" )
+			    VAR TrendArrow = IF ( MoM >= 0, "▲", "▼" )
+			    VAR TrendColor = IF ( MoM >= 0, "#1D9E75", "#E24B4A" )
+			    VAR TopProduct = [Top Product by APE]
+			    VAR Persistency = FORMAT ( [Persistency_Rate], "0%" )
+			    RETURN
+			        "<div style='font-family:Arial; border:1px solid #ddd; border-radius:8px; padding:16px; max-width:320px;'>" &
+			        "<h2 style='margin:0 0 4px 0; font-size:35px;'>" & AgentName & "</h2>" &
+			        "<p style='margin:0 0 12px 0; color:#666; font-size:25px;'>" & Territory & "</p>" &
+			        "<div style='display:flex; justify-content:space-between; margin-bottom:8px;'>" &
+			        "<span style='font-size:25px; color:#666;'>YTD APE</span>" &
+			        "<span style='font-size:25px; font-weight:bold;'>" & YTD1 & "</span>" &
+			        "</div>" &
+			        "<div style='display:flex; justify-content:space-between; margin-bottom:8px;'>" &
+			        "<span style='font-size:25px; color:#666;'>Rank</span>" &
+			        "<span style='font-size:25px; font-weight:bold;'>#" & Rank1 & "</span>" &
+			        "</div>" &
+			        "<div style='display:flex; justify-content:space-between; margin-bottom:8px;'>" &
+			        "<span style='font-size:25px; color:#666;'>MoM trend</span>" &
+			        "<span style='font-size:25px; font-weight:bold; color:" & TrendColor & ";'>" & TrendArrow & " " & MoMText & "</span>" &
+			        "</div>" &
+			        "<div style='display:flex; justify-content:space-between; margin-bottom:8px;'>" &
+			        "<span style='font-size:25px; color:#666;'>Top product</span>" &
+			        "<span style='font-size:25px; font-weight:bold;'>" & TopProduct & "</span>" &
+			        "</div>" &
+			        "<div style='display:flex; justify-content:space-between;'>" &
+			        "<span style='font-size:25px; color:#666;'>Persistency</span>" &
+			        "<span style='font-size:25px; font-weight:bold;'>" & Persistency & "</span>" &
+			        "</div>" &
+			        "</div>"
+			)
+		lineageTag: f73680da-8f66-44a7-9824-2e226b3af5ae
+
+	measure FCT_APE = ```
+			sum(fact_sales[ape_usd]) 
+			```
+		lineageTag: e4c2260a-1240-484a-84f8-7f425993d1c4
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Rank by APE' =
+			
+			RANKX (
+			    ALL ( dim_agent[agent_name] ),
+			    [APE_YTD],
+			    ,
+			    DESC
+			)
+		formatString: 0
+		lineageTag: 1807fd0e-1d71-4666-a44b-46fe181d7dee
+
+	measure 'Top Product by APE' =
+			
+			VAR __TopTable =
+			    TOPN (
+			        1,
+			        ALLSELECTED ( dim_product[product_name] ),
+			        [APE_YTD],
+			        DESC
+			    )
+			RETURN
+			MAXX ( __TopTable, dim_product[product_name] )
+		lineageTag: 5f36db09-5ac3-44a4-b049-2815cb21f1f1
+
+	measure 'APE MoM Growth %' = ```
+			
+			VAR CurrentAPE = [FCT_APE]
+			VAR PreviousMonthAPE =
+			    CALCULATE ( [FCT_APE], DATEADD ( dim_date[Date], -1, MONTH ) )
+			RETURN 
+			    DIVIDE ( CurrentAPE - PreviousMonthAPE, PreviousMonthAPE )
+			```
+		lineageTag: 3e261d2f-1699-4e04-a5aa-f81e021d397d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Persistency_Rate% = DIVIDE(CALCULATE(DISTINCTCOUNT(fact_persistency[policy_id]),fact_persistency[renewal_status]="renewed"),DISTINCTCOUNT(fact_persistency[policy_id]),0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 3b375dd9-8146-4717-9996-510ad7f41589
+
+	measure 'Active Policy Count' =
+			
+			VAR TempDate = MAX ( dim_date[Date] )
+			VAR TempKey = VALUE ( FORMAT ( Tempdate, "YYYYMMDD" ) )
+			RETURN
+			CALCULATE (
+			    COUNTROWS ( fact_persistency ),
+			    fact_persistency[issue_date_key] <= TempKey,
+			    fact_persistency[renewal_due_date_key] > TempDate
+			)
+		formatString: 0
+		lineageTag: da9b41ea-a3c5-4097-9ed6-4ab8bf4e4d8a
+
+	measure Renewed_Count = CALCULATE(COUNTROWS(fact_persistency),fact_persistency[renewal_status]="renewed")
+		formatString: 0
+		lineageTag: dd908928-8b44-4ff1-b622-c0fcd5d7cdc8
+
+	measure tets
+		lineageTag: e57e04d0-ea87-4e8d-9b1f-adb42abe8053
+
+	measure 'Top Products Tooltip' =
+			
+			VAR Products =
+			TOPN (
+			5,
+			SUMMARIZE (
+			dim_product,
+			dim_product[product_name],
+			"APE", [APE_YTD]
+			),
+			[APE], DESC
+			)
+			RETURN
+			CONCATENATEX (
+			Products,
+			dim_product[product_name] & " (" &
+			FORMAT ( [APE], "#,##0" ) & ")",
+			UNICHAR(10)
+			)
+		lineageTag: 203f8a22-eb53-498d-b206-a063da574fc5
+
+	measure 'Manpower SVG' =
+			
+			VAR _Value = [APE vs Target%]
+			VAR _FillColor =
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(_Value), "#F2F2F2",
+			        _Value >= 1,     "#D9EAD3",
+			        _Value >= 0.8,   "#FFE4A3",
+			                         "#F7C7C7"
+			    )
+			
+			VAR _BorderColor =
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(_Value), "#D9D9D9",
+			        _Value >= 1,     "#93C47D",
+			        _Value >= 0.8,   "#F6B94A",
+			                         "#E89999"
+			    )
+			
+			VAR _TextColor =
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(_Value), "#808080",
+			        _Value >= 1,     "#38761D",
+			        _Value >= 0.8,   "#B45F06",
+			                         "#C74B50"
+			    )
+			
+			VAR _Text =
+			    IF(
+			        ISBLANK(_Value),
+			        "",
+			        FORMAT(_Value, "0%")
+			    )
+			
+			RETURN
+			    "data:image/svg+xml;utf8," &
+			    "<svg xmlns='http://www.w3.org/2000/svg'
+			          width='110'
+			          height='34'
+			          viewBox='0 0 110 34'>
+			        <rect
+			            x='5'
+			            y='4'
+			            width='100'
+			            height='26'
+			            rx='13'
+			            fill='" & _FillColor & "'
+			            stroke='" & _BorderColor & "'
+			            stroke-width='1.5'
+			        />
+			        <text
+			            x='55'
+			            y='21'
+			            text-anchor='middle'
+			            font-family='Segoe UI'
+			            font-size='12'
+			            font-weight='600'
+			            fill='" & _TextColor & "'>"
+			            & _Text &
+			        "</text>
+			    </svg>"
+		lineageTag: 5514527e-a4ad-4d38-83ad-844669f963a5
+		dataCategory: ImageUrl
+
+	column Column
+		formatString: 0
+		lineageTag: 713a959d-0452-4ba7-a326-659e87211160
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Measure = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = f3e73b44d95d49668bd3e1f81e5c45d8
+
+	annotation 436ba87b-9c83-4389-a31b-ebd06a36be98 = {"Expression":""}
+

@@ -1,0 +1,99 @@
+table fact_persistency
+	lineageTag: 73ea54f4-105f-4dc4-a3d7-74c1288fcf94
+
+	column policy_id
+		dataType: int64
+		formatString: 0
+		lineageTag: f24d876f-0583-410f-bcc0-d58377066263
+		summarizeBy: sum
+		sourceColumn: policy_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column agent_id
+		dataType: int64
+		formatString: 0
+		lineageTag: fb001f6a-3d70-4608-8f7a-189205b820f1
+		summarizeBy: none
+		sourceColumn: agent_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: c862d6f8-b2ab-4342-b0cf-baeff22e3bbc
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column issue_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 557c3c83-49d0-4c0f-ab5d-64646ab7497b
+		summarizeBy: none
+		sourceColumn: issue_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column renewal_due_date_key
+		dataType: int64
+		formatString: 0
+		lineageTag: b3298f14-7035-4777-9cdb-32678ec49f77
+		summarizeBy: sum
+		sourceColumn: renewal_due_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column renewal_status
+		dataType: string
+		lineageTag: c540565a-7591-4579-8b46-b18850e96e06
+		summarizeBy: none
+		sourceColumn: renewal_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column premium_usd
+		dataType: double
+		lineageTag: a31aab62-fcbf-4dfa-948c-14ec308615ca
+		summarizeBy: sum
+		sourceColumn: premium_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column issue_year = INT ( fact_persistency[issue_date_key] / 10000 )
+		formatString: 0
+		lineageTag: 554c3466-5f7a-4649-8641-e20ada471c2c
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column renewal_due_year = INT ( fact_persistency[renewal_due_date_key] / 10000 )
+		formatString: 0
+		lineageTag: 6dadc9aa-9c65-41cd-93af-20f03b756714
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column year_offset = [renewal_due_year] - [issue_year]
+		formatString: 0
+		lineageTag: 4af4f22f-d1f0-40ac-9ce5-cda78d774678
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_persistency = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents("C:\Users\Shruthi.K\OneDrive - Fractal Analytics Limited\Documents\Chubb Assignment\data\fact_persistency.csv"), [Delimiter = ",", Columns = 7, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"issue_date_key", Int64.Type}, {"policy_id", Int64.Type}, {"agent_id", Int64.Type}, {"product_id", Int64.Type}, {"renewal_due_date_key", Int64.Type}, {"renewal_status", type text}, {"premium_usd", type number}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

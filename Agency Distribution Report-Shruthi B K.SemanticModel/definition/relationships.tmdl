@@ -1,0 +1,56 @@
+relationship 8d803f17-39a5-44ba-9f42-ebec1e563cf9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_agent.join_date
+	toColumn: LocalDateTable_4f35dc19-079b-476b-9c65-be18392795bd.Date
+
+relationship AutoDetected_82a171bc-c849-4a66-86f6-9a9e37c98512
+	fromColumn: fact_persistency.agent_id
+	toColumn: dim_agent.agent_id
+
+relationship AutoDetected_51c901d2-513c-4963-bd8c-f43dfdad50ef
+	fromColumn: fact_sales.agent_id
+	toColumn: dim_agent.agent_id
+
+relationship AutoDetected_74f283e6-9d68-4866-8aa0-49774ec2b3d8
+	fromColumn: fact_target.agent_id
+	toColumn: dim_agent.agent_id
+
+relationship AutoDetected_57b4ca0d-f4df-4504-a0c0-021e8aaf65d7
+	fromColumn: fact_persistency.product_id
+	toColumn: dim_product.product_id
+
+relationship AutoDetected_f8b7998f-42e9-46f4-9084-7f1142b0de95
+	fromColumn: fact_sales.product_id
+	toColumn: dim_product.product_id
+
+relationship 12c244ab-f15f-4a05-b81e-430538bb744d
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_date.date
+	toColumn: LocalDateTable_c3cb0cff-fb43-430a-a4bd-886fe7a8c52e.Date
+
+relationship AutoDetected_bde1e514-308c-473a-9638-39761f932677
+	fromColumn: fact_sales.date_key
+	toColumn: dim_date.date_key
+
+relationship AutoDetected_029d1d58-c4a4-43c3-85f4-50c6f5acc43d
+	crossFilteringBehavior: bothDirections
+	fromColumn: dim_date.YearMonth
+	toColumn: bridge_year_month.YearMonth
+
+relationship AutoDetected_a9b25bba-efb5-4291-a9d5-30f9c135c10e
+	fromColumn: fact_target.YearMonth
+	toColumn: bridge_year_month.YearMonth
+
+relationship 2c1369c5-4aeb-d3cc-0fa5-2d2ca71a0529
+	fromColumn: fact_persistency.issue_date_key
+	toColumn: dim_date.date_key
+
+relationship AutoDetected_3facffa8-a3f1-4127-9b05-4bf84743b01a
+	fromColumn: dim_agent.region
+	toColumn: Dim_Rls.Region
+
+relationship 144e2ef7-34eb-f448-0c03-a5a3162bcdf0
+	isActive: false
+	fromColumn: fact_persistency.renewal_due_date_key
+	toColumn: dim_date.date_key
+

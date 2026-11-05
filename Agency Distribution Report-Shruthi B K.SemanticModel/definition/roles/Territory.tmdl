@@ -1,0 +1,7 @@
+role Territory
+	modelPermission: read
+
+	tablePermission Dim_Rls = Dim_Rls[EmailID]=USERPRINCIPALNAME()
+
+	annotation PBI_Id = e25f8e04c4034df3ae4d7f4d69af1b86
+

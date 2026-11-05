@@ -1,0 +1,69 @@
+table fact_target
+	lineageTag: 7f9076de-e8a4-4f52-bc37-93c442215fe8
+
+	column agent_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 84e97f62-6ada-41b1-87be-b690a15153f7
+		summarizeBy: none
+		sourceColumn: agent_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: baf29137-3984-4117-8cad-c58b885b6a09
+		summarizeBy: sum
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 1a20b5bc-4781-4d82-be74-5acf77e6d66d
+		summarizeBy: sum
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	column ape_target_usd
+		dataType: double
+		lineageTag: d1f0c918-5ce0-417b-83a4-2ef05396e481
+		summarizeBy: sum
+		sourceColumn: ape_target_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TargetDateKey = fact_target[year]*10000 + fact_target[month]*100+1
+		formatString: 0
+		lineageTag: 4a2757a5-6855-410a-9288-ec7598b1f7ba
+		summarizeBy: count
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearMonth
+		dataType: int64
+		formatString: 0
+		lineageTag: 961551e5-5662-456d-ba6b-e47bd197ab6f
+		summarizeBy: none
+		sourceColumn: YearMonth
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_target = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents("C:\Users\Shruthi.K\OneDrive - Fractal Analytics Limited\Documents\Chubb Assignment\data\fact_target.csv"), [Delimiter = ",", Columns = 4, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"agent_id", Int64.Type}, {"year", Int64.Type}, {"month", Int64.Type}, {"ape_target_usd", type number}}),
+				  #"Duplicated column" = Table.TransformColumnTypes(Table.AddColumn(#"Changed column type", "YearMonth", each [year] * 100 + [month]), {{"YearMonth", Int64.Type}})
+				in
+				  #"Duplicated column"
+
+	annotation PBI_ResultType = Table
+

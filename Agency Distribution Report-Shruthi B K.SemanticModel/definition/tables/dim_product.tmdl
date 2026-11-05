@@ -1,0 +1,56 @@
+table dim_product
+	lineageTag: e3f066c6-7576-49c9-acd2-8c1d7f25caaf
+
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 340c16a7-d254-4551-b1ad-28248259ffd1
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_code
+		dataType: string
+		lineageTag: 7da2c0b2-8dc9-42c1-89c0-360f0c988f2e
+		summarizeBy: none
+		sourceColumn: product_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_name
+		dataType: string
+		lineageTag: 5906aa14-c68c-4c49-88c8-1482ba15cb69
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column product_category
+		dataType: string
+		lineageTag: 6fd5aec2-1d1a-4b21-8732-d7d58fd7408a
+		summarizeBy: none
+		sourceColumn: product_category
+
+		annotation SummarizationSetBy = Automatic
+
+	column premium_type
+		dataType: string
+		lineageTag: f56ff6af-49be-47c0-a637-98158cdedba9
+		summarizeBy: none
+		sourceColumn: premium_type
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_product = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents("C:\Users\Shruthi.K\OneDrive - Fractal Analytics Limited\Documents\Chubb Assignment\data\dim_product.csv"), [Delimiter = ",", Columns = 5, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"product_id", Int64.Type}, {"product_code", type text}, {"product_name", type text}, {"product_category", type text}, {"premium_type", type text}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

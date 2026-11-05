@@ -1,0 +1,114 @@
+table dim_agent
+	lineageTag: d34963e7-0558-4de9-89c5-f3e438b12192
+
+	column agent_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 6a172341-3468-40e2-9797-bdedfcccb640
+		summarizeBy: none
+		sourceColumn: agent_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column agent_code
+		dataType: string
+		lineageTag: 6086ba37-b953-4384-ab42-af15e7340e67
+		summarizeBy: none
+		sourceColumn: agent_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column agent_name
+		dataType: string
+		lineageTag: 3daccdfb-adb8-495e-a41f-b18b52871788
+		summarizeBy: none
+		sourceColumn: agent_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column region
+		dataType: string
+		lineageTag: 422a2bc9-5182-42f9-875a-64f16065ec76
+		summarizeBy: none
+		sourceColumn: region
+
+		annotation SummarizationSetBy = Automatic
+
+	column territory
+		dataType: string
+		lineageTag: 46b45323-0928-47af-bcee-cb4153b26397
+		summarizeBy: none
+		sourceColumn: territory
+
+		annotation SummarizationSetBy = Automatic
+
+	column office
+		dataType: string
+		lineageTag: f91b4d52-7944-492a-a60c-2496d85a5b8c
+		summarizeBy: none
+		sourceColumn: office
+
+		annotation SummarizationSetBy = Automatic
+
+	column join_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 38b3ff84-a12d-4225-88cc-75cf20992bf8
+		summarizeBy: none
+		sourceColumn: join_date
+
+		variation Variation
+			isDefault
+			relationship: 8d803f17-39a5-44ba-9f42-ebec1e563cf9
+			defaultHierarchy: LocalDateTable_4f35dc19-079b-476b-9c65-be18392795bd.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column channel
+		dataType: string
+		lineageTag: 13c446ba-581f-4371-aa6d-168ee920f5a7
+		summarizeBy: none
+		sourceColumn: channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column active_flag
+		dataType: int64
+		formatString: 0
+		lineageTag: 7f6a7b80-2531-47a0-a53a-bc7187b3d36d
+		summarizeBy: sum
+		sourceColumn: active_flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'ID Status' =
+			
+			IF (
+			ISBLANK (
+			LOOKUPVALUE (
+			fact_sales[agent_id],
+			fact_sales[agent_id], dim_agent[agent_id]
+			)
+			),
+			"Dim Only",
+			"Present in Fact"
+			)
+		lineageTag: 82fa0c57-9c83-4619-8781-68c66fa7c77d
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_agent = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents("C:\Users\Shruthi.K\OneDrive - Fractal Analytics Limited\Documents\Chubb Assignment\data\dim_agent.csv"), [Delimiter = ",", Columns = 9, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"agent_id", Int64.Type}, {"agent_code", type text}, {"agent_name", type text}, {"region", type text}, {"territory", type text}, {"office", type text}, {"join_date", type date}, {"channel", type text}, {"active_flag", Int64.Type}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

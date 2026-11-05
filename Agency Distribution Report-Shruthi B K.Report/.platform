@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Agency Distribution Report-Shruthi B K"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "0153728c-4319-46eb-a0e9-311c9f23278b"
+  }
+}
